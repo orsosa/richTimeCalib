@@ -12,7 +12,7 @@ if RICHTIMECALIB == "":
 
 ############## global setting ###########
 outdir_pref = "/volatile/clas/claseg2/osoto/RICH/timeCalib/Hists"
-appHist   = RICHTIMECALIB + "/bin/richTiming_app"
+appHist   = RICHTIMECALIB + "/bin/richTiming"
 aBin = [RICHTIMECALIB + "/bin/richTimeOffsets"]
 aBin.append(RICHTIMECALIB + "/bin/richTimeWalks")
 aBin.append(RICHTIMECALIB + "/bin/richTimeCheck")

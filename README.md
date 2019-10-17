@@ -2,11 +2,12 @@
 This package contains a set of tools to performs the time calibration of the CLAS12 RICH detector.
 
 ## Requirement
-* Hipo4 c++ installed and environments variables ```HIPO4LIB``` and  ```HIPO4INC``` with the hipo4 library and headers respectively
+* Hipo4 c++ installed and environments variables ```HIPO4LIB``` and  ```HIPO4INC``` set to the hipo4 library and headers respectively
 * Root version >= 5.34
 
 ## Getting ready
-```git clone https://github.com/orsosa/richTimeCalib
+```
+git clone https://github.com/orsosa/richTimeCalib
 cd richTimeCalib
 make
 setenv RICHTIMECALIB `pwd`
