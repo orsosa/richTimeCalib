@@ -1,5 +1,5 @@
 .DELETE_ON_ERROR:
-.PHONY: all
+.PHONY: all checkdir
 
 ROOTCFLAGS  := $(shell root-config --cflags)
 ROOTLDFLAGS := $(shell root-config --ldflags)
@@ -12,15 +12,6 @@ endif
 
 ifndef HIPO4LIB
 $(error HIPO4LIB is not set)
-endif
-
-ifeq ($(wildcard .obj/.),)
-	@echo ".obj not found, creating the directory..."
-	mkdir .obj
-endif
-ifeq ($(wildcard bin/.),)
-	@echo "bin not found, creating the directory..."
-	mkdir bin
 endif
 
 HIPOCFLAGS  := -I$(HIPO4INC)
@@ -41,8 +32,11 @@ AR	  = ar
 ARFLAGS	  = -cvr #create,verbose,quick (don't check for replacement, otherwise use r instead)
 
 
-all:  bin/richTiming bin/richTimeOffsets bin/richTimeWalks bin/richTimeCheck
+all: checkdir bin/richTiming bin/richTimeOffsets bin/richTimeWalks bin/richTimeCheck
 
+checkdir:
+	@if test ! -d .obj; then mkdir .obj; fi
+	@if test ! -d bin; then  mkdir bin; fi
 
 bin/%: .obj/%.o
 	$(CXX) -o $@ $< $(ROOTCFLAGS) $(ROOTLDFLAGS) $(HIPOLIBS) $(LZ4LIBS)  $(ROOTLIBS) 
