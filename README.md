@@ -10,9 +10,8 @@ This package contains a set of tools to performs the time calibration of the CLA
 git clone https://github.com/orsosa/richTimeCalib
 cd richTimeCalib
 make
+make install
 setenv RICHTIMECALIB `pwd`
-chmod +x bin/*
-chmod +x script/*
 ```
 add the enviroment variable ```RICHTIMECALIB``` to your login script.
 ## Use
