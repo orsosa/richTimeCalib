@@ -24,10 +24,11 @@ maps = [RICHTIMECALIB + "/maps/SspRich_mapCHANNEL2PIXEL.txt"]
 maps.append(RICHTIMECALIB + "/maps/SspRich_mapFIBER2PMT_sortbyPMT.tx")
 ofile_pref = "RichTimeCalib_"
 WF    = "rich_timeCalib"
-DEBUG = False
 RN    = 0
+TRACK = "analysis"
+## debug run ##
+DEBUG = False
 MAXJOBS = 2
-TRACK = "debug"
 #################################################
 def checkdir(path):
     if not os.path.isdir(path):
@@ -109,7 +110,7 @@ def add_ana_job(wf,flist,phase=0):
         fname = outdir_pref + "/T"+ str(T) +"/" + fname.replace(".hipo","") + "__RichTimeCalibE_" + RN + "_" + str(T) +".root"
         cmd += " -input " + fname.split("/")[-1] + " file:" + fname
         c +=1
-        if c>=MAXJOBS: break
+        if c>= MAXJOBS and DEBUG: break
 
     cmd += ' ./' + script.split("/")[-1] + " " + outdir + " " + RN
     if DEBUG : print (cmd)
@@ -169,7 +170,7 @@ def main():
     for fn in flist:
         add_hist_job(WF,fn,phase,c)
         c +=1
-        if c>=MAXJOBS: break
+        if c>= MAXJOBS and DEBUG: break
 
     ##### Setting jobs phase ###########
     phase +=1
@@ -184,7 +185,7 @@ def main():
         print fn
         add_hist_job(WF,fn,phase,c)
         c +=1
-        if c>=MAXJOBS: break
+        if c>= MAXJOBS and DEBUG: break
 
     ##### Setting jobs phase ###########
     phase +=1
@@ -199,7 +200,7 @@ def main():
         print fn
         add_hist_job(WF,fn,phase,c)
         c +=1
-        if c>=MAXJOBS: break
+        if c>= MAXJOBS and DEBUG: break
 
     ##### Setting jobs phase ###########
     phase +=1

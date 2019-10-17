@@ -50,5 +50,9 @@ bin/%: .obj/%.o
 .obj/%.o: src/%.cxx
 	$(CXX) $(CXXFLAGS) -c -o $@ $< $(ROOTCFLAGS) $(HIPOCFLAGS) $(LZ4INCLUDES) $(INC_DIR)
 
+install:
+	chmod +x bin/*
+	chmod +x script/*
+
 clean:
 	rm bin/* 
