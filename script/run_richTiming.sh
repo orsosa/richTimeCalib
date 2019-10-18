@@ -24,8 +24,8 @@ if [ -z $3 ]; then
 else
     RN=$3
 fi
-
-fn="`basename *.hipo | head -1`"
+fn="`ls *.hipo | head -1`"
+fn="`basename $fn`"
 fn=${fn/.hipo/-bunch}
 
 echo "RUN NUMBER "$RN
