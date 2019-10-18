@@ -26,6 +26,7 @@ ofile_pref = "RichTimeCalib_"
 WF    = "rich_timeCalib"
 RN    = 0
 TRACK = "analysis"
+BS = 10  # hist jobs bunch size
 ## debug run ##
 DEBUG = False
 MAXJOBS = 2
@@ -53,19 +54,22 @@ def import_flist(fname):
     return flist
 
 ##### add histogram job to workflow
-def add_hist_job(wf,fname,phase=0,c=0):
+def add_hist_job(wf,fnl,phase=0,c=0):
     global outdir_pref, appHist, scriptHist, RN
     script = scriptHist
     jname = wf + "_" + "ph" + str(phase) + "_" + str(c)
-    size = os.path.getsize(fname)/1024./1024.*1.15
-    cmd  = "swif add-job -workflow " + wf + " -ram 3000mb -project clas12 -time 10min -disk " + "{0:.0f}".format(size) + "mb "
+    size = 0
+    for fname in fnl:
+        size += os.path.getsize(fname)/1024./1024.*1.15
+    cmd  = "swif add-job -workflow " + wf + " -ram 3000mb -project clas12 -time 100min -disk " + "{0:.0f}".format(size) + "mb "
     cmd += " -track "+ TRACK
     cmd += " -phase " + str(phase)
     cmd += " -name " + jname
     cmd += " -shell /bin/bash" 
     cmd += " -input " + appHist.split("/")[-1] + " file:" + appHist
     cmd += " -input " + script.split("/")[-1] + " file:" + script
-    cmd += " -input " + fname.split("/")[-1] + " file:" + fname
+    for fname in fnl:
+        cmd += " -input " + fname.split("/")[-1] + " file:" + fname
     T = int(phase/2)
     corr_type = ["Offsets","Walks"]
     if phase > 0:
@@ -81,8 +85,8 @@ def add_hist_job(wf,fname,phase=0,c=0):
 #### add analysis job ##########################
 def add_ana_job(wf,flist,phase=0):
     global outdir_pref, aBin, aScript, RN
-    size = 24*4.
-    cmd  = "swif add-job -workflow " + wf + " -ram 500mb -project clas12 -time 20min -disk " + "{0:.0f}".format(size) + "mb "
+    size = 24*150
+    cmd  = "swif add-job -workflow " + wf + " -ram 1000mb -project clas12 -time 100min -disk " + "{0:.0f}".format(size) + "mb "
     cmd += " -track "+ TRACK
     cmd += " -phase " + str(phase)
     cmd += " -shell /bin/bash" 
@@ -105,9 +109,10 @@ def add_ana_job(wf,flist,phase=0):
     checkdir(outdir)
 
     c = 0
-    for fname in flist:
+    for fnl in flist:
+        fname = fnl[0]
         fname = fname.split("/")[-1]
-        fname = outdir_pref + "/T"+ str(T) +"/" + fname.replace(".hipo","") + "__RichTimeCalibE_" + RN + "_" + str(T) +".root"
+        fname = outdir_pref + "/T"+ str(T) +"/" + fname.replace(".hipo","-bunch") + "__RichTimeCalibE_" + RN + "_" + str(T) +".root"
         cmd += " -input " + fname.split("/")[-1] + " file:" + fname
         c +=1
         if c>= MAXJOBS and DEBUG: break
@@ -116,10 +121,25 @@ def add_ana_job(wf,flist,phase=0):
     if DEBUG : print (cmd)
     subprocess.call(cmd,shell=True)
 
+### group files un bunchs ###
+def add_hist_job_bunch(flist,phase=0):
+    global WF
+    c=0
+    for fnl in flist:
+        add_hist_job(WF,fnl,phase,c)
+        c +=1
+        if c>= MAXJOBS and DEBUG: break
+
+
 ######### create workflow #####
 def create_wf():
     global WF
-    cmd="swif create " + WF
+    with open(os.devnull, "w") as devnull:
+        ret = subprocess.call("swif status " + WF,shell=True,stderr=devnull,stdout=devnull)
+    if not ret:
+        cmd  = "swif cancel -delete -workflow " + WF
+        subprocess.call(cmd,shell=True)
+    cmd ="swif create " + WF
     if DEBUG : print (cmd)
     subprocess.call(cmd,shell=True)
 
@@ -132,7 +152,7 @@ def run_wf():
 ######## main routine ####
 
 def main():
-    global WF, RN, outdir_pref, MAXJOBS
+    global WF, RN, outdir_pref, MAXJOBS, BS
     if len(argv)<2: 
         print "A directory with calibration files or filelist must be supplied"
         exit (1)
@@ -155,22 +175,19 @@ def main():
 
     outdir_pref += "/" + RN
     create_wf()
-    flist = []
+    flist_flat = []
     if os.path.isdir(argv[1]):
-        flist = get_file_list(argv[1])
+        flist_flat = get_file_list(argv[1])
     elif os.path.isfile(argv[1]):
-        flist = import_flist(argv[1])
+        flist_flat = import_flist(argv[1])
     else:
         print argv[1] + " is not a file nor a directory."
 
+    flist = [flist_flat[x*BS:(x+1)*BS] for x in range( -(-len(flist_flat) // BS ) )]
     ##### Setting jobs phase ###########
     phase = 0
     ##### Putting jobs to make histograms without correction ####
-    c=0
-    for fn in flist:
-        add_hist_job(WF,fn,phase,c)
-        c +=1
-        if c>= MAXJOBS and DEBUG: break
+    add_hist_job_bunch(flist,phase)
 
     ##### Setting jobs phase ###########
     phase +=1
@@ -180,12 +197,7 @@ def main():
     ##### Setting jobs phase ###########
     phase +=1
     #### Putting jobs to make histogram with TO corrections ####
-    c=0
-    for fn in flist:
-        print fn
-        add_hist_job(WF,fn,phase,c)
-        c +=1
-        if c>= MAXJOBS and DEBUG: break
+    add_hist_job_bunch(flist,phase)
 
     ##### Setting jobs phase ###########
     phase +=1
@@ -195,12 +207,7 @@ def main():
     ##### Setting jobs phase ###########
     phase +=1
     #### Putting jobs to make histogram with TO and TW corrections ####
-    c=0
-    for fn in flist:
-        print fn
-        add_hist_job(WF,fn,phase,c)
-        c +=1
-        if c>= MAXJOBS and DEBUG: break
+    add_hist_job_bunch(flist,phase)
 
     ##### Setting jobs phase ###########
     phase +=1

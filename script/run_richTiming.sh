@@ -18,15 +18,15 @@ FILEPREFIX="calib_clas_00"
 
 ## Get run number from command line or filename
 if [ -z $3 ]; then
-    RN="`ls *.hipo`"
+    RN="`ls *.hipo | head -1`"
     RN=${RN##*$FILEPREFIX}
     RN=${RN%%.*.hipo}
 else
     RN=$3
 fi
 
-fn="`basename *.hipo`"
-fn=${fn/.hipo/}
+fn="`basename *.hipo | head -1`"
+fn=${fn/.hipo/-bunch}
 
 echo "RUN NUMBER "$RN
 phase=$1
