@@ -7,11 +7,17 @@ import subprocess
 RICHTIMECALIB = os.getenv("RICHTIMECALIB")
 if RICHTIMECALIB == "":
     print "environment variable $RICHTIMECALIB must be set to"
+    print "the location of the time calibration suite. setenv RICHTIMECALIB `pwd`"
+    exit(1)
+
+RICHTIMECALIB_OUTPATH = os.getenv("RICHTIMECALIB_OUTPATH")
+if RICHTIMECALIB_OUTPATH == "":
+    print "environment variable $RICHTIMECALIB_OUTPATH must be set to"
     print "the location of the time calibration suite."
     exit(1)
 
 ############## global setting ###########
-outdir_pref = "/volatile/clas/claseg2/osoto/RICH/timeCalib/Hists"
+outdir_pref = RICHTIMECALIB_OUTPATH
 appHist   = RICHTIMECALIB + "/bin/richTiming"
 aBin = [RICHTIMECALIB + "/bin/richTimeOffsets"]
 aBin.append(RICHTIMECALIB + "/bin/richTimeWalks")
@@ -78,7 +84,10 @@ def add_hist_job(wf,fnl,phase=0,c=0):
     outdir = outdir_pref + "/T" + str(T)
     checkdir(outdir)
 
-    cmd += " ./" + script.split("/")[-1] + " " + str(T) +  " " + outdir + " " + RN
+    outpref = fnl[0]
+    outpref = outpref.split("/")[-1]
+
+    cmd += " ./" + script.split("/")[-1] + " " + str(T) +  " " + outdir + " " + outpref + " " + RN
     if DEBUG : print (cmd)
     subprocess.call(cmd,shell=True)
 

@@ -17,16 +17,14 @@
 FILEPREFIX="calib_clas_00"
 
 ## Get run number from command line or filename
-if [ -z $3 ]; then
+if [ -z $4 ]; then
     RN="`ls *.hipo | head -1`"
     RN=${RN##*$FILEPREFIX}
     RN=${RN%%.*.hipo}
 else
-    RN=$3
+    RN=$4
 fi
-fn="`ls *.hipo | head -1`"
-fn="`basename $fn`"
-fn=${fn/.hipo/-bunch}
+$outpref=$3
 
 echo "RUN NUMBER "$RN
 phase=$1
@@ -38,5 +36,5 @@ ls
 ofile="`ls *.root`"
 
 ## Setting the output file transfer
-swif outfile $ofile file:$outdir/${fn}__${ofile}
+swif outfile $ofile file:$outdir/${outpref}__${ofile}
 

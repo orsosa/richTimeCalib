@@ -12,46 +12,49 @@ cd richTimeCalib
 make
 make install
 setenv RICHTIMECALIB `pwd`
+setenv RICHTIMECALIB_OUTPATH <output-path>
 ```
-add the enviroment variable ```RICHTIMECALIB``` to your login script.
+add the enviroments variables ```RICHTIMECALIB``` and ```RICHTIMECALIB_OUTPATH``` to your login script.
+A folder for each run number will be created under the path ```RICHTIMECALIB_OUTPATH```
+
+
 ## Use
 ```
 cd $RICHTIMECALIB/script
 ./send_richTimeCalib.py <path-to-calib-files or list-of-calib-files> <run-number>
 ```
-## Structure
+After finishing you will have a folder in ```$RICHTIMECALIB_OUTPATH``` named <run-number>
+The structure inside ```$RICHTIMECALIB_OUTPATH/<run-number>``` is:
 ```
-├── include
-│   ├── Clas12Banks4.h
-│   ├── Clas12Detectors.h
-│   ├── Clas12Pid.h
-│   ├── process_opt.h
-│   ├── RichGeometry.h
-│   ├── RichHW.h
-│   ├── RichTimeCorr.h
-│   └── RichTT.h
-├── macros
-│   ├── richTimeOffsets.C
-│   └── richTimeWalks.C
+$RICHTIMECALIB_OUTPATH/<run-number>`
+├── T0       # Histograms without corrections
+│   ├── ...
+├── T1       # Histograms with Time offset correction
+│   ├── ...
+├── T2       # Histograms with time walk and time offset correction
+│   ├── ...
+├── TCheck   # Summary histograms and diagnose information
+│   ├── ...
+├── TOffsets # Time offset correction histograms and calibration parameters
+│   ├── ...
+└── TWalks   # Time walk correction histograms and calibration parameters
+    └── ...
+```
+
+## Structure
+The package structure is organize in the folowing way:
+```
+$RICHTIMECALIB
 ├── Makefile
-├── maps
-│   ├── SspRich_mapCHANNEL2PIXEL.txt
-│   └── SspRich_mapFIBER2PMT_sortbyPMT.txt
 ├── README.md
-├── script
-│   ├── richTimeCheck.C
-│   ├── run_richTiming.sh
-│   ├── run_TC.sh
-│   ├── run_TO_corr.sh
-│   ├── run_TW_corr.sh
-│   └── send_richTimeCalib.py
-└── src
-    ├── richTimeCheck.cxx
-    ├── richTimeOffsets.cxx
-    ├── richTimeWalks.cxx
-    ├── richTiming_app.cxx
-    ├── richTiming.cxx
-    └── richTiming_expert.cxx
+├── include # Headers needed to read hipo files and write root files and other tools
+│   ├── ...
+├── maps    # RICH PMT/ANODE maps
+│   ├── ...
+├── script  # script to run binaries in bin/. Includes python script to create swif workflow
+│   ├── ...
+└── src	    # ...
+    └── ...
 ```
 After compilation two folders are created ```bin/``` and ```.obj/```
 ## FAQ
