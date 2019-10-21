@@ -23,7 +23,8 @@ A folder for each run number will be created under the path ```RICHTIMECALIB_OUT
 cd $RICHTIMECALIB/script
 ./send_richTimeCalib.py <path-to-calib-files or list-of-calib-files> <run-number>
 ```
-After finishing you will have a folder in ```$RICHTIMECALIB_OUTPATH``` named <run-number>
+After finishing you will have a folder in ```$RICHTIMECALIB_OUTPATH``` named ```<run-number>```
+
 The structure inside ```$RICHTIMECALIB_OUTPATH/<run-number>``` is:
 ```
 $RICHTIMECALIB_OUTPATH/<run-number>`

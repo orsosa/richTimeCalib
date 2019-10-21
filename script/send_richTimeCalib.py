@@ -85,7 +85,7 @@ def add_hist_job(wf,fnl,phase=0,c=0):
     checkdir(outdir)
 
     outpref = fnl[0]
-    outpref = outpref.split("/")[-1]
+    outpref = outpref.split("/")[-1].replace(".hipo","-bunch")
 
     cmd += " ./" + script.split("/")[-1] + " " + str(T) +  " " + outdir + " " + outpref + " " + RN
     if DEBUG : print (cmd)

@@ -24,7 +24,7 @@ if [ -z $4 ]; then
 else
     RN=$4
 fi
-$outpref=$3
+outpref=$3
 
 echo "RUN NUMBER "$RN
 phase=$1
