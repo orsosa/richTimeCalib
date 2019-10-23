@@ -166,7 +166,7 @@ def main():
         print "A directory with calibration files or filelist must be supplied"
         exit (1)
     if not os.path.exists(argv[1]):
-        print "The file or path " + argv[1] + "does not exist"
+        print "The file or path " + argv[1] + " does not exist"
         exit (1)
 
     if len(argv) == 3:

@@ -82,6 +82,7 @@ TObjArray Hlist(0);
 int main(int argc, char* argv[]) {
   TBenchmark bench;
   bench.Start("MAIN");
+
   /* ======================================== */
   /* Scanning the command line */
   parse_opt(argc,argv); // Check process_opt.h for modifications.
@@ -393,22 +394,4 @@ void makeHistos()
   }
  
   
-}
-/* ===================================================== */
-void print_help(char *processName)
-{
-  fprintf(stderr,"Usage: %s [-Options] \n\n",processName);
-  fprintf(stderr,"  Options:\n");
-
-  fprintf(stderr,"\t-n[#]\t\tMax number of entries\n");
-  fprintf(stderr,"\t-R[#]\t\tRun number\n");
-  fprintf(stderr,"\t-T[#]\t\tApplying the time corrections: 0=No corr; 1=Only offset; 2=offset and time-walk; 3=Only time-walk\n");
-  fprintf(stderr,"\t-C\t\tUsing RICH calibrated time (NOTE: the time correction flag is forced to 0)\n");
-  fprintf(stderr,"\t-s\t\tCorrecting by hand for the event start time (def: already done in the RICH rec.)\n");
-  fprintf(stderr,"\t-r\t\tUsing the ray tracing solution (def.: using the analytic solution)\n");
-  fprintf(stderr,"\t-P[#]\t\tUsing particle with PID=# (def.: 11->electrons, etc; -1->AllNeg; +1->AllPos; 0->All; 99->Straight tracks)\n");
-  fprintf(stderr,"\t-t[#]\t\tSetting the average of the DTime window in the histograms (default: -90 ns)\n");
-  fprintf(stderr,"\t-Z\t\tAnalysis of Zero Field data\n");
-
-  exit(0);
 }

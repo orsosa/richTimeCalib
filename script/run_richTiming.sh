@@ -31,7 +31,7 @@ phase=$1
 outdir=$2
 
 ## Running the application
-./richTiming -R $RN -r -P 11 -T $phase *.hipo
+./richTiming -R $RN -r -P 0 -T $phase *.hipo
 ls
 ofile="`ls *.root`"
 

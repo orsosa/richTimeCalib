@@ -7,16 +7,16 @@
 #include "TMath.h"
 #include "TDatabasePDG.h"
 #include "TParticlePDG.h"
-#include<TTree.h>
-#include<TChain.h>
-#include<TH2F.h>
-#include<TF1.h>
-#include<TVector3.h>
-#include<TLorentzVector.h>
-#include<TCanvas.h>
-#include<TApplication.h>
-#include<TRint.h>
-#include<TStyle.h>
+#include <TTree.h>
+#include <TChain.h>
+#include <TH2F.h>
+#include <TF1.h>
+#include <TVector3.h>
+#include <TLorentzVector.h>
+#include <TCanvas.h>
+#include <TApplication.h>
+#include <TRint.h>
+#include <TStyle.h>
 #include <TBenchmark.h>
 
 /****************************************/
@@ -31,12 +31,6 @@
 /*==================================================================*/
 
 using namespace std;
-
-/* ================================================================ */
-#include <RichHW.h>
-#include "Clas12Detectors.h"
-#include "Clas12Pid.h"
-#include <RichTimeCorr.h>
 
 /* ================================================================ */
 /* For time correction */
@@ -73,6 +67,11 @@ TString inputFiles[MAXFILES];
 /* output root file */
 TString rootFile = "";
 
+/* ================================================================ */
+#include <RichHW.h>
+#include "Clas12Detectors.h"
+#include "Clas12Pid.h"
+#include <RichTimeCorr.h>
 
 /* ================================================================ */
 /* Histograms */
@@ -80,7 +79,7 @@ void makeHistos();
 TObjArray Hlist(0);
 
 /******************************************/
-int main(int argc, char** argv) {
+int main(int argc, char* argv[]) {
   TBenchmark bench;
   bench.Start("MAIN");
 
@@ -102,21 +101,19 @@ int main(int argc, char** argv) {
   std::cout<<"Root file name: " + rootFile<<std::endl;
 
   /* ===================================== */
+  /* Histograms */
+  makeHistos();
+
+  /* ===================================== */
   /* Enforcing no time correction if the RICH calibrated time is used */
   if (iCalibratedTime) iTimeCorr = 0;
 
 
   /* ===================================== */
-  /* Histograms */
-  makeHistos();
-  
-  /* ===================================== */
   /* Time corrections */
   InitTimeCorrections();
-  if (iTimeCorr) {
-    LoadTimeOffsets();
-    if (iTimeCorr == 2) LoadTimeWalkPars();
-  }
+  if ( (iTimeCorr == 1) || (iTimeCorr == 2) ) LoadTimeOffsets();
+  if ( (iTimeCorr == 2) || (iTimeCorr == 3) ) LoadTimeWalkPars();
 
   /* ===================================== */
   /* Some counters */
@@ -134,34 +131,33 @@ int main(int argc, char** argv) {
   //  TH1F *h1;
   TH2F *h2;
   char name[200];
-
-  
-  /* ===================================== */
-  /* hipo4 object inizializations */
-  fEvent = new hipo::event();
-  fFactory = new hipo::dictionary();
-  fReader = new hipo::reader();
  
 
-  
   /* ====================================== */
   /* LOOP OVER THE HIPO FILES */
   for (int l=0; l<nFiles; l++) {
+    /* ===================================== */
+    /* hipo4 object inizializations */
+    fEvent = new hipo::event();
+    fFactory = new hipo::dictionary();
+    fReader = new hipo::reader();
+
     printf("==>> READING HIPO FILE: %s\n", inputFiles[l].Data());
  
     /* opening the hipo4 file */
     //fReader->open(flist[f]);  TString input
-    fReader->open(inputFiles[l]);
+    std::cout<<__FILE__<<":"<<__LINE__<<std::endl;
+    fReader->open(inputFiles[l].Data());
+    std::cout<<__FILE__<<":"<<__LINE__<<std::endl;
 
     /* Bank definition */
     fReader->readDictionary(*fFactory);
+    //    if (!fFactory) continue;
     InitBanks();
-
 
     /* looping over the current file */
     while( (fReader->next() )  && ( (entry < nEntries)||(nEntries == 0) ) ) {
       fReader->read(*fEvent);
-
        /* looking for CLAS12 banks */
       if (FillBanks() ) {
 
@@ -179,11 +175,8 @@ int main(int argc, char** argv) {
 	    double ts = 0;
 	    if ( (RUN__config_timestamp % 2) == 1) ts = 4.;
 
-
 	    /* Loading the pindex Map */
 	    LoadPindexMap(REC__Particle->getRows());
-
-
 	    
 	    /* Selecting events with 1 track in the RICH */
 	    if (RICH__hadrons->getRows() == 1) {
@@ -242,12 +235,8 @@ int main(int argc, char** argv) {
 		    /* Delta T (measured-calculated) */
 		    double DTime = MeasPhotonTime - CalcPhotonTime;
 		
-		
 		    //printf("i=%d  rawT=%f  rawTc=%f  ts=%f\n", RICH__hits_rawtime, MeasPhotonTime, ts);
 		    //printf("  stT=%f   anT=%f  DT=%f\n", RICH__photons_start_time, RICH__photons_analytic_time, DTime);
-	
-
-
 		
 		    sprintf(name, "hDTime");
 		    gDirectory->GetObject(name, h2);
@@ -313,6 +302,10 @@ int main(int argc, char** argv) {
 
 
     }/* END loop over the current file */
+
+    delete fEvent;
+    delete fFactory;
+    delete fReader;
 	  
   }
   printf("Total number of events:  %d \n", entry);
@@ -329,17 +322,14 @@ int main(int argc, char** argv) {
   //Hlist.ls();
   Hlist.Write();
   f.Close();
-  
-  return 1;
+  bench.Show("MAIN");
+  return 0;
 }
 /* ------------------------------------------------------ */
 void makeHistos()
 {
   /* Histograms for the time calibration */
-
-  char name[200];
-  char title[200];
-
+  TString name,title;
 
   /* channel binning */
   int nbins = nPMTS*nANODES;
@@ -372,23 +362,23 @@ void makeHistos()
   double cmax = cmin + nc;
 
 
-  sprintf(title, "#Delta T vs channel");
-  sprintf(name, "hDTime");
+  title = "#Delta T vs channel";
+  name = "hDTime";
   TH2F *hDTime = new TH2F(name, title, nbins, bmin, bmax, na, amin, amax);
   Hlist.Add(hDTime);
   
-  sprintf(title, "#Delta T vs channel");
-  sprintf(name, "hDTime2");
+  title = "#Delta T vs channel";
+  name = "hDTime2";
   TH2F *hDTime2 = new TH2F(name, title, nbins, bmin, bmax, na, -1500, 1500);
   Hlist.Add(hDTime2);
 
-  sprintf(title, "#Delta T_{corr} vs channel");
-  sprintf(name, "hDTimeCorr");
+  title = "#Delta T_{corr} vs channel";
+  name = "hDTimeCorr";
   TH2F *hDTimeCorr = new TH2F(name, title, nbins, bmin, bmax, ndt, dt1, dt2);
   Hlist.Add(hDTimeCorr);
 
-  sprintf(title, "#Delta L vs channel");
-  sprintf(name, "hDLenCorr");
+  title = "#Delta L vs channel";
+  name =  "hDLenCorr";
   TH2F *hDLenCorr = new TH2F(name, title, nbins, bmin, bmax, ndt, 30*dt1, 30*dt2);
   Hlist.Add(hDLenCorr);
 
@@ -397,33 +387,16 @@ void makeHistos()
   for (Int_t p=0; p<nPMTS; p++) {
 
       
-    sprintf(name, "hDTimeVsDuration_Pmt%d", p+1);
-    sprintf(title, "#Delta T vs Duration, PMT %d", p+1);
+    name = Form("hDTimeVsDuration_Pmt%d", p+1);
+    title = Form("#Delta T vs Duration, PMT %d", p+1);
     TH2F *hDTimeVsDuration_Pmt = new TH2F(name, title, nc, cmin, cmax, na, amin, amax);
     Hlist.Add(hDTimeVsDuration_Pmt);
 
-    sprintf(name, "hDTimeCorrVsDuration_Pmt%d", p+1);
-    sprintf(title, "#Delta T_{corr} vs Duration, PMT %d", p+1);
+    name = Form("hDTimeCorrVsDuration_Pmt%d", p+1);
+    title = Form("#Delta T_{corr} vs Duration, PMT %d", p+1);
     TH2F *hDTimeCorrVsDuration_Pmt = new TH2F(name, title, nc, cmin, cmax, ndt, dt1, dt2);
     Hlist.Add(hDTimeCorrVsDuration_Pmt);
 
   }
-  
-}
-/* ===================================================== */
-void PrintUsage(char *processName)
-{
-  fprintf(stderr,"Usage: %s [-Options] \n\n",processName);
-  fprintf(stderr,"  Options:\n");
-
-  fprintf(stderr,"\t-n[#]\t\tMax number of entries\n");
-  fprintf(stderr,"\t-R[#]\t\tRun number\n");
-  fprintf(stderr,"\t-T[#]\t\tApplying the time corrections: 1=Only offset; 2=Also time-walk\n");
-  fprintf(stderr,"\t-s\t\tCorrecting by hand for the event start time (def: already done in the RICH rec.)\n");
-  fprintf(stderr,"\t-r\t\tUsing the ray tracing solution (def.: using the analytic solution)\n");
-  fprintf(stderr,"\t-P[#]\t\tUsing particle with PID=# (def.: 11->electrons, etc; -1->AllNeg; +1->AllPos; 0->All; 99->Straight tracks)\n");
-  fprintf(stderr,"\t-t[#]\t\tSetting the average of the DTime window in the histograms (default: -90 ns)\n");
-  fprintf(stderr,"\t-Z\t\tAnalysis of Zero Field data\n");
-
-  exit(0);
+ 
 }
