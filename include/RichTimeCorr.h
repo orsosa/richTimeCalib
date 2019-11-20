@@ -23,7 +23,7 @@ void LoadTimeOffsets()
   int sector, pmt, anode;
 
   /* Reading the corrections */
-  TString filename = Form("richTimeOffsets_%d.out",RunNumber);
+  TString filename = Form("richTimeOffsets_ccdb_%d.out",RunNumber);
   std::cout <<"correction file: "<< filename << std::endl;
   fIn = fopen(filename.Data(), "r");
   if (fIn) {
@@ -57,7 +57,7 @@ void LoadTimeWalkPars()
 
 
   /* Reading the corrections */
-  TString filename = Form("richTimeWalks_%d.out",RunNumber);
+  TString filename = Form("richTimeWalks_ccdb_%d.out",RunNumber);
   std::cout <<"correction file: "<< filename << std::endl;
   fIn = fopen(filename.Data(), "r");
   if (fIn) {

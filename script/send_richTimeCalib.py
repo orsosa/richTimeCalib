@@ -27,7 +27,7 @@ aScript  = [RICHTIMECALIB + "/script/run_TO_corr.sh"]
 aScript.append(RICHTIMECALIB + "/script/run_TW_corr.sh")
 aScript.append(RICHTIMECALIB + "/script/run_TC.sh")
 maps = [RICHTIMECALIB + "/maps/SspRich_mapCHANNEL2PIXEL.txt"]
-maps.append(RICHTIMECALIB + "/maps/SspRich_mapFIBER2PMT_sortbyPMT.tx")
+maps.append(RICHTIMECALIB + "/maps/SspRich_mapFIBER2PMT_sortbyPMT.txt")
 ofile_pref = "RichTimeCalib_"
 WF    = "rich_timeCalib"
 RN    = 0
@@ -67,19 +67,23 @@ def add_hist_job(wf,fnl,phase=0,c=0):
     size = 0
     for fname in fnl:
         size += os.path.getsize(fname)/1024./1024.*1.15
-    cmd  = "swif add-job -workflow " + wf + " -ram 700mb -project clas12 -time 100min -disk " + "{0:.0f}".format(size) + "mb "
+    cmd  = "swif add-job -workflow " + wf + " -ram 700mb -project clas12 -time 6h -disk " + "{0:.0f}".format(size) + "mb "
     cmd += " -track "+ TRACK
     cmd += " -phase " + str(phase)
     cmd += " -name " + jname
     cmd += " -shell /bin/bash" 
     cmd += " -input " + appHist.split("/")[-1] + " file:" + appHist
     cmd += " -input " + script.split("/")[-1] + " file:" + script
+    cmd += " -input " + maps[0].split("/")[-1] + " file:" + maps[0]
+    cmd += " -input " + maps[1].split("/")[-1] + " file:" + maps[1]
+
     for fname in fnl:
         cmd += " -input " + fname.split("/")[-1] + " file:" + fname
     T = int(phase/2)
     corr_type = ["Offsets","Walks"]
-    if phase > 0:
-        cmd += " -input richTime" + corr_type[T-1] + "_" + RN + ".out" + " file:" + outdir_pref + "/T" + corr_type[T-1] + "/richTime" + corr_type[T-1] + "_" + RN + ".out"
+    if T > 0:
+        for k in range(T,0,-1):
+            cmd += " -input richTime" + corr_type[k-1] + "_ccdb_" + RN + ".out" + " file:" + outdir_pref + "/T" + corr_type[k-1] + "/richTime" + corr_type[k-1] + "_ccdb_" + RN + ".out"
 
     outdir = outdir_pref + "/T" + str(T)
     checkdir(outdir)
@@ -94,8 +98,9 @@ def add_hist_job(wf,fnl,phase=0,c=0):
 #### add analysis job ##########################
 def add_ana_job(wf,flist,phase=0):
     global outdir_pref, aBin, aScript, RN
-    size = 24*150
-    cmd  = "swif add-job -workflow " + wf + " -ram 550mb -project clas12 -time 100min -disk " + "{0:.0f}".format(size) + "mb "
+    #    size = 24*150
+    size = 24*2
+    cmd  = "swif add-job -workflow " + wf + " -ram 550mb -project clas12 -time 6h -disk " + "{0:.0f}".format(size) + "mb "
     cmd += " -track "+ TRACK
     cmd += " -phase " + str(phase)
     cmd += " -shell /bin/bash" 
@@ -106,6 +111,9 @@ def add_ana_job(wf,flist,phase=0):
 
     cmd += " -input " + app.split("/")[-1] + " file:" + app
     cmd += " -input " + script.split("/")[-1] + " file:" + script
+
+    cmd += " -input " + maps[0].split("/")[-1] + " file:" + maps[0]
+    cmd += " -input " + maps[1].split("/")[-1] + " file:" + maps[1]
 
     jname = wf + "_" + "ph" + str(phase) 
 
@@ -130,7 +138,7 @@ def add_ana_job(wf,flist,phase=0):
     if DEBUG : print (cmd)
     subprocess.call(cmd,shell=True)
 
-### group files un bunchs ###
+### group files in bunchs ###
 def add_hist_job_bunch(flist,phase=0):
     global WF
     c=0
@@ -192,6 +200,7 @@ def main():
     else:
         print argv[1] + " is not a file nor a directory."
 
+    #### making a nested file list with maximum BS file per bunch ####
     flist = [flist_flat[x*BS:(x+1)*BS] for x in range( -(-len(flist_flat) // BS ) )]
     ##### Setting jobs phase ###########
     phase = 0

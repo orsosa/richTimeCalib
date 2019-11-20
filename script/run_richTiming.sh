@@ -12,6 +12,8 @@
 # [RN]     = Optional parameter, run number.
 #
 ###################################
+source /group/clas12/packages/setup.csh
+module load clas12/pro
 
 ### Prefix of filenames
 FILEPREFIX="calib_clas_00"
@@ -30,6 +32,8 @@ echo "RUN NUMBER "$RN
 phase=$1
 outdir=$2
 
+ldd ./richTiming
+printenv
 ## Running the application
 ./richTiming -R $RN -r -P 0 -T $phase *.hipo
 ls
