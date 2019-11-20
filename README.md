@@ -59,9 +59,9 @@ $RICHTIMECALIB
 ```
 After compilation two folders are created ```bin/``` and ```.obj/```
 ## FAQ
-** Q: ** Some of the jobs have status error AUGER-TIMEOUT, what can I do?
+**Q:** Some of the jobs have status error AUGER-TIMEOUT, what can I do?
 
-** A: **  you can add time to the problematic jobs doing ```swif modify-jobs rich_timeCalib -time add 3h -problems AUGER-TIMEOUT```
+**A:**  you can add time to the problematic jobs doing ```swif modify-jobs rich_timeCalib -time add 3h -problems AUGER-TIMEOUT```
 
 
   
