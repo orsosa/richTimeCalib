@@ -2,7 +2,7 @@
 This package contains a set of tools to extract time calibration parameters for the CLAS12 RICH detector.
 
 ## Requirement
-* Hipo4 c++ installed and environments variables ```HIPO4LIB``` and  ```HIPO4INC``` set to the hipo4 library and headers respectively
+* Hipo4 c++ installed and environments variables ```HIPO4LIB``` and  ```HIPO4INC``` pointing to the path with the hipo4 library and headers (*.h) respectively
 * Root version >= 5.34
 
 ## Getting ready
@@ -62,6 +62,11 @@ After compilation two folders are created ```bin/``` and ```.obj/```
 **Q:** Some of the jobs have status error AUGER-TIMEOUT, what can I do?
 
 **A:**  you can add time to the problematic jobs doing ```swif modify-jobs rich_timeCalib -time add 3h -problems AUGER-TIMEOUT```
+
+**Q:** How to avoid the jobs that have finished with errors like, SWIF-USER-NON-ZERO?
+
+**A:**  you can exclude from your input list files with small size. Probably these files are corrupted from reconstruction.
+
 
 
   
